@@ -1,0 +1,592 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Alder Table Shift Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap">
+<style>
+/* Layout: a fixed 1280x720 "projector slide" scaled to fit the window, with a slim control dock underneath for the person driving. Theme: Stock the Shelf — grocery-aisle whites, Alder Table green, yellow shelf tags. */
+:root{
+  color-scheme: light;
+  --green:#1F5A43; --green-ink:#163F2F; --mint:#CFE3D8; --mist:#E4F0E9;
+  --bg:#EEF2F0; --paper:#FFFFFF; --ink:#15201B; --muted:#5B6A62; --soft:#36443D; --line:#D9E0DC; --line2:#C3CDC8;
+  --tag:#FFD43B; --tag-ink:#2A2200; --tag-tint:#FFF7D6; --tag-edge:#E8D58A;
+  --ok:#23864F; --ok-tint:#E5F3EB; --ok-edge:#9CCFB2; --bad:#B3261E; --bad-tint:#FBE8E6;
+  --g0:#1E5FA3; --g1:#C9580A; --g2:#93306A;
+  --alder:#E3ECF7; --alder-ink:#123E6B; --alt:#FBEDE4; --alt-ink:#8A3B06;
+  --dock:#0F1A15;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+html,body{height:100%}
+body{background:var(--dock);color:var(--ink);font-family:var(--body);overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--tag);outline-offset:2px}
+#viewport{position:fixed;inset:0 0 54px 0;display:grid;place-items:center;overflow:hidden;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+#stage{width:1280px;height:720px;background:var(--bg);position:relative;transform-origin:center center;flex:none;overflow:hidden;display:flex;flex-direction:column}
+#stage.flash{animation:flash 1s ease-in-out 3}
+@keyframes flash{50%{box-shadow:inset 0 0 0 10px var(--bad)}}
+#dock{position:fixed;left:0;right:0;bottom:0;height:54px;background:var(--dock);color:#DDE6E1;display:flex;align-items:center;gap:8px;padding:0 max(12px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(12px,env(safe-area-inset-left,0px));overflow-x:auto;font-size:14px}
+#dock button,#dock select{background:#1D2B24;border:1px solid #33463C;color:#E8F0EC;border-radius:7px;padding:6px 10px;font-weight:600;white-space:nowrap}
+#dock button:hover{border-color:#6F8A7C}
+#dock .on{background:var(--tag);color:var(--tag-ink);border-color:var(--tag)}
+#dock select{max-width:260px}
+#dock .sep{width:1px;height:26px;background:#33463C;flex:none}
+#dock .lbl{font-family:var(--mono);font-size:12px;color:#9FB2A8;white-space:nowrap}
+#dock input[type=range]{width:80px;accent-color:var(--tag)}
+#confirm{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);background:var(--paper);color:var(--ink);border:2px solid var(--bad);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;font-weight:600;z-index:20;max-width:calc(100% - 32px);flex-wrap:wrap}
+.hdr{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px 36px;background:var(--green);color:#fff;flex:none}
+.hdr .l{display:flex;align-items:baseline;gap:14px;min-width:0}
+.ttl{font-family:var(--display);font-weight:900;font-stretch:75%;font-size:34px;text-transform:uppercase;line-height:1;white-space:nowrap}
+.sub{font-size:16px;color:var(--mint)}
+.hdr .r{display:flex;align-items:center;gap:10px}
+.badge{background:var(--tag);color:var(--tag-ink);border-radius:6px;padding:4px 10px;font-family:var(--display);font-weight:900;font-stretch:75%;font-size:18px;letter-spacing:.06em}
+.tm{font-family:var(--mono);font-weight:700;font-size:30px;background:#fff;color:var(--ink);border-radius:8px;padding:2px 14px;font-variant-numeric:tabular-nums;min-width:112px;text-align:center}
+.tm.low,.big.low{color:var(--bad)}
+.tm.done{background:var(--bad);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55}}
+.tags{display:flex;gap:6px}
+.tag{background:var(--tag);border-radius:6px;padding:5px 10px;font-family:var(--display);font-weight:900;font-stretch:75%;font-size:17px;white-space:nowrap}
+.main{flex:1;min-height:0;padding:18px 36px;display:flex;flex-direction:column;gap:14px}
+.white{background:var(--paper);border-radius:12px}
+.cap{font-family:var(--display);font-weight:800;font-stretch:75%;font-size:14px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.muted{color:var(--muted)}
+.ask{background:var(--paper);border-left:6px solid var(--tag);border-radius:0 10px 10px 0;padding:11px 15px;font-size:17px;line-height:1.35}
+.btn{border:2px solid var(--green);background:#fff;color:var(--green);border-radius:8px;padding:9px 14px;font-weight:700;font-size:15px;white-space:nowrap}
+.btn:hover{background:var(--ok-tint)}
+.btn.solid{background:var(--green);color:#fff}
+.btn.solid:hover{background:var(--green-ink)}
+.btn.yel{background:var(--tag);border-color:var(--tag);color:var(--tag-ink)}
+.btn.g{border-color:var(--c);color:var(--c)}
+.btn.g.on{background:var(--c);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gc0{--c:var(--g0)} .gc1{--c:var(--g1)} .gc2{--c:var(--g2)}
+.gname{font-family:var(--display);font-weight:900;font-stretch:75%;text-transform:uppercase;color:var(--c)}
+.num{width:36px;height:36px;border-radius:8px;background:var(--tag);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:18px;flex:none}
+.brief{flex:1;display:flex;align-items:center;justify-content:center;padding:36px}
+.brief article{width:1080px;background:#fff;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.brief .top{background:var(--green);color:#fff;padding:26px 40px 22px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.brief .kick{font-family:var(--display);font-weight:800;font-stretch:75%;font-size:15px;letter-spacing:.1em;color:var(--mint);text-transform:uppercase}
+.brief h1{margin:6px 0 0;font-family:var(--display);font-weight:900;font-stretch:75%;font-size:60px;line-height:.95;text-transform:uppercase}
+.brief .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.brief .chips span{background:#fff;color:var(--ink);border-radius:8px;padding:8px 12px;font-weight:700;font-size:16px;white-space:nowrap}
+.brief .body{padding:28px 40px 30px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:36px}
+.brief .intro{margin:0;font-size:21px;line-height:1.4}
+.brief ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:13px}
+.brief li{display:flex;gap:14px;align-items:flex-start;font-size:19px;line-height:1.35}
+.pts-box{background:var(--tag-tint);border:2px solid var(--tag);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;font-size:16px}
+.pts-box .cap{color:#5A4A00}
+.go{background:var(--green);color:#fff;font-weight:700;font-size:20px;padding:16px 20px;border-radius:10px;border:0;text-align:center}
+.go:hover{background:var(--green-ink)}
+.paper{flex:1;display:grid;grid-template-columns:minmax(0,1fr);min-height:0;background:#fff}
+.paper.side{grid-template-columns:minmax(0,1fr) 500px}
+.pcenter{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:16px 32px}
+.big{font-family:var(--mono);font-weight:700;font-size:220px;line-height:.92;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.side .big{font-size:170px}
+.trays{display:flex;gap:7px;align-items:flex-end;width:100%}
+.trays i{flex:1;height:30px;border-radius:6px 6px 3px 3px;border:2px dashed var(--line2);box-sizing:border-box}
+.trays i.f{background:var(--green);border:2px solid var(--green)}
+.shelfbar{height:8px;background:var(--line);border-radius:2px;width:100%}
+.psteps{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;font-size:16px;color:var(--soft)}
+.psteps b{background:var(--tag);border-radius:4px;padding:0 6px;color:var(--ink);margin-right:4px}
+.pfoot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;border-top:2px solid #E3E9E6;padding:14px 36px 16px;background:#fff;flex:none}
+.fridge{flex:1;background:#fff;border:12px solid var(--line);border-radius:16px;padding:12px 20px 10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.led{height:5px;border-radius:3px;background:#E6F6FF}
+.shelf{flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.slots{display:flex;gap:6px;align-items:flex-end;padding:0 4px;flex-wrap:nowrap}
+.tray{width:38px;height:36px;border-radius:6px 6px 3px 3px;background:var(--c);display:flex;flex-direction:column;padding:4px;box-sizing:border-box;gap:4px;flex:none}
+.tray::before{content:"";height:4px;border-radius:2px;background:#fff;opacity:.6}
+.tray::after{content:"";margin-top:auto;height:8px;border-radius:2px;background:#fff;opacity:.9}
+.tray.new{animation:drop .5s ease-out}
+@keyframes drop{from{transform:translateY(-30px);opacity:0}}
+.slot{width:38px;height:36px;border-radius:6px;border:2px dashed var(--line2);box-sizing:border-box;flex:none}
+.plank{height:10px;background:var(--line);border-radius:2px}
+.label{display:flex;align-items:center;gap:12px;background:var(--tag);padding:4px 12px 5px;border-radius:0 0 6px 6px;align-self:flex-start;margin-left:4px}
+.label .n{font-family:var(--display);font-weight:900;font-stretch:75%;font-size:22px;text-transform:uppercase;color:var(--c)}
+.label .p{font-family:var(--display);font-weight:900;font-size:22px;color:var(--tag-ink)}
+.label .m{font-size:13px;font-weight:600;color:#4A4110}
+.label button{border:1.5px solid #B99B12;background:#FFE680;border-radius:5px;padding:0 7px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--tag-ink)}
+.strip{display:flex;gap:5px}
+.strip div{border-radius:6px;padding:7px 8px;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fff}
+.strip .done{background:var(--line2);color:#2E3B34}
+.strip .now{background:var(--tag);color:var(--tag-ink)}
+.tray-area{background:#fff;border:2px dashed var(--line2);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;min-height:58px;flex:none}
+.card{background:#fff;border:2px solid var(--line);border-radius:8px;padding:8px 11px;font-size:15px;font-weight:600;box-shadow:0 3px 0 var(--line);text-align:left;max-width:300px}
+.card:hover{border-color:var(--green)}
+.card.sel{border-color:var(--ink);box-shadow:0 0 0 3px var(--tag)}
+.placed{background:var(--ok-tint);border:1.5px solid var(--ok-edge);border-radius:7px;padding:6px 9px;font-size:13.5px;line-height:1.3}
+.zone{background:#fff;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;border:2px solid transparent}
+.zone.armed{border-color:var(--tag);cursor:pointer}
+.zone.armed:hover{background:var(--tag-tint)}
+.zone .zh{background:var(--green);color:#fff;padding:9px 12px;font-family:var(--display);font-weight:900;font-stretch:75%;font-size:19px;text-transform:uppercase;line-height:1.05}
+.zone .zb{padding:9px;display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow:auto}
+.seg{display:flex;border:2px solid var(--green);border-radius:7px;overflow:hidden}
+.seg button{flex:1;border:0;background:#fff;color:var(--green);padding:6px 0;font-weight:700;font-size:13.5px}
+.seg button+button{border-left:2px solid var(--green)}
+.seg button.on{background:var(--green);color:#fff}
+.toast{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);padding:10px 18px;border-radius:8px;font-weight:700;font-size:17px;color:#fff;background:var(--ok);z-index:30;animation:tin .25s ease-out;white-space:nowrap}
+.toast.bad{background:var(--bad)}
+@keyframes tin{from{transform:translate(-50%,10px);opacity:0}}
+.qtext{margin:0;font-family:var(--display);font-weight:800;font-size:38px;line-height:1.15;max-width:32ch}
+.qtext mark{background:var(--tag);padding:0 10px;border-radius:6px;color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.opt{display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--line);border-radius:10px;padding:14px 16px;font-size:22px;font-weight:600}
+.opt .k{width:40px;height:40px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:22px;flex:none}
+.opt.ok{background:var(--ok-tint);border-color:var(--ok)}
+.opt.ok .k{background:var(--ok)}
+.opt.dim{opacity:.45}
+.mapwrap{background:#fff;border-radius:12px;padding:12px 16px 8px;display:grid;grid-template-columns:84px minmax(0,1fr);grid-template-rows:minmax(0,1fr) 34px;min-height:0;flex:1}
+.ylab{display:grid;grid-template-rows:repeat(3,minmax(0,1fr));padding-right:10px;text-align:right;font-size:15px;font-weight:800}
+.ylab span{align-self:center}
+.ylab small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.grid9{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);position:relative;min-height:0}
+.cell{border:1px dashed var(--line);padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;min-height:0}
+.cell .cn{position:absolute;top:5px;left:8px;font-family:var(--mono);font-size:12px;font-weight:700;color:#9AA8A1}
+.cell.armed{cursor:pointer;background:#FBFCF4}
+.cell.armed:hover{background:var(--tag-tint)}
+.cell .key{position:absolute;top:5px;right:8px;font-size:11px;font-weight:800;color:var(--ok);background:var(--ok-tint);border-radius:4px;padding:1px 5px}
+.offer{background:var(--tag-tint);border:2px solid var(--tag-edge);border-radius:8px;padding:6px 11px;text-align:center;font-size:12.5px;line-height:1.3}
+.offer b{font-size:15px;display:block}
+.offer.alder{background:var(--alder);border-color:var(--g0);color:var(--alder-ink)}
+button.offer.sel{box-shadow:0 0 0 3px var(--tag);border-color:var(--ink)}
+.altchip{background:var(--alt);border:2px dashed var(--g1);border-radius:8px;padding:6px 12px;color:var(--alt-ink);font-weight:800;font-size:14px}
+.xlab{grid-column:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center;padding-top:7px;font-size:15px;font-weight:800}
+#arrows{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.vccol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.vchead{background:var(--c);color:#fff;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline}
+.vcitem{background:#fff;border-radius:10px;padding:11px 14px;display:flex;flex-direction:column;gap:5px;border:3px solid #fff;position:relative;text-align:left;font-size:15px;line-height:1.4;color:var(--soft)}
+.vcitem b{font-size:17px;color:var(--ink)}
+.vcitem.leak{border-color:var(--bad)}
+.stamp{position:absolute;top:-12px;right:10px;background:#fff;border:2.5px solid var(--bad);color:var(--bad);border-radius:4px;padding:1px 7px;font-family:var(--display);font-weight:900;font-stretch:75%;font-size:13px;letter-spacing:.06em;transform:rotate(3deg)}
+.metric{background:#fff;border-radius:12px;padding:15px 17px;display:flex;flex-direction:column;gap:8px;border-top:6px solid var(--line);min-width:0}
+.metric.won{border-top-color:var(--c)}
+.metric .ans{font-family:var(--mono);font-weight:700;font-size:30px;margin-top:auto}
+.metric .ans.hid{color:var(--line2)}
+.pod{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end;flex:1}
+.pcol{display:flex;flex-direction:column}
+.ptrays{display:flex;flex-wrap:wrap-reverse;gap:5px;justify-content:center;padding:0 8px 6px}
+.ptrays .tray{width:30px;height:26px}
+.pblock{background:var(--c);border-radius:10px 10px 0 0;color:#fff;display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:2px}
+.pblock .pl{font-family:var(--display);font-weight:900;font-size:32px;line-height:1}
+.pblock .pn{font-family:var(--display);font-weight:900;font-stretch:75%;font-size:24px;text-transform:uppercase}
+.pblock .pp{font-family:var(--mono);font-weight:700;font-size:20px}
+.mystery{background:var(--line2);border-radius:10px 10px 0 0;height:190px;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:64px;color:#fff}
+.rec label{font-weight:700;font-size:14px;display:block;margin-bottom:3px}
+.rec textarea{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:7px;padding:6px 8px;font-size:14.5px;resize:none;height:46px;line-height:1.35;background:#fff}
+.rec textarea:focus{outline:none;border-color:var(--green)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="viewport"><div id="stage" role="main"></div></div>
+<div id="dock" aria-label="Facilitator controls">
+  <button data-act="prev" aria-label="Previous screen">◀ Back</button>
+  <select id="jump" aria-label="Jump to screen"></select>
+  <button data-act="next" aria-label="Next screen">Next ▶</button>
+  <span class="sep"></span>
+  <button data-act="home" id="homebtn">Shelf</button>
+  <span class="sep"></span>
+  <span class="lbl">TIMER</span>
+  <button data-act="tplay" id="tplay">Pause</button>
+  <button data-act="tadd">+1 min</button>
+  <button data-act="treset">Restart</button>
+  <span class="sep"></span>
+  <button data-act="beat" id="beatbtn">Beat: off</button>
+  <input type="range" id="vol" min="0" max="1" step="0.05" value="0.5" aria-label="Volume">
+  <button data-act="testbell">Test bell</button>
+  <span class="sep"></span>
+  <button data-act="resetask">New game</button>
+</div>
+<div id="confirmslot"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+(function(){
+/* ======================= content ======================= */
+const G=[{name:'Operations',short:'Ops'},{name:'Sales',short:'Sales'},{name:'Kitchen',short:'Kitchen'}];
+const PLANS=[{k:'A',name:'Focused range'},{k:'B',name:'Premium flexible'},{k:'C',name:'Production partner'}];
+const QUIZ=[
+ {q:'Revenue grew from $2.4M to $2.7M in 2025, but operating profit ___.',o:['rose about 12%','fell by two-thirds, to $60K','stayed flat','fell slightly, to $160K'],a:1,why:'If sales grew, where did the profit go?'},
+ {q:'Revenue per meal stayed at $10.00, while cost of goods sold per meal ___.',o:['rose to $6.60','fell to $5.40','stayed at $6.00','rose to $8.00'],a:0,why:'Is this a demand problem or a cost problem?'},
+ {q:'Ingredient waste rose from 6% of input cost to ___.',o:['8%','14%','20%','10%'],a:3,why:'What in the kitchen would cause more waste?'},
+ {q:'On-time complete deliveries dropped from 95% to ___.',o:['90%','86%','80%','72%'],a:1,why:'How would a grocery buyer react to this?'},
+ {q:'Out of 18 recipes, six core meals make up ___ of unit sales.',o:['30%','50%','90%','70%'],a:3,why:'What does this say about the other 12 recipes?'},
+ {q:'Overtime production hours went from 1,400 to ___.',o:['2,600','1,800','3,400','5,000'],a:0,why:'What does nearly doubling overtime say about scheduling?'},
+ {q:'Annual subscriber retention fell from 74% to ___.',o:['70%','55%','65%','45%'],a:2,why:'Which customers are leaving, and where are they going?'},
+ {q:'Taken together, these numbers suggest the main problem is ___.',o:['weak demand for the meals','prices far below competitors','too few grocery accounts','costs rising from too much complexity'],a:3,why:'What is the evidence? What else could explain it?'}
+];
+const FORCES=[{id:'buyers',name:'Buyer power',g:0},{id:'suppliers',name:'Supplier power',g:0},{id:'subs',name:'Substitutes',g:1},{id:'entrants',name:'New entrants',g:1},{id:'rivalry',name:'Rivalry',g:2}];
+const FF=[
+ {id:'f1',t:'Retailers buy about three quarters of output',z:'buyers'},
+ {id:'f2',t:'Grocery buyers can reduce orders within four weeks',z:'buyers'},
+ {id:'f3',t:'The five largest accounts are 36% of revenue',z:'buyers'},
+ {id:'f4',t:'Two regional farms supply most specialty vegetables',z:'suppliers'},
+ {id:'f5',t:'Ingredient quotations hold for only 30 days',z:'suppliers'},
+ {id:'f6',t:'Packaging suppliers are more numerous',z:'suppliers'},
+ {id:'f7',t:'Meal kits allow customization but still need cooking',z:'subs'},
+ {id:'f8',t:'Former subscribers switched to supermarket meals or cheap takeout',z:'subs'},
+ {id:'f9',t:'Shared kitchens let small entrants test recipes without a full plant',z:'entrants'},
+ {id:'f10',t:'Winning store access and building a reputation takes effort',z:'entrants'},
+ {id:'f11',t:'Own-label meals: lower prices and consistent availability',z:'rivalry'},
+ {id:'f12',t:'Regional brands compete on freshness and local identity',z:'rivalry'}
+];
+const OFFERS=[
+ {id:'premium',name:'Premium specialist',sub:'$16–19 · 8 meals',key:0},
+ {id:'takeout',name:'Restaurant takeout',sub:'$19–24 · same day',key:2},
+ {id:'alder',name:'Alder Table',sub:'$13–16 · 18 rotating',key:5},
+ {id:'own',name:'Own-label',sub:'$8–10 · 12 stable',key:7}
+];
+const VC=[
+ {g:0,items:[['Inbound logistics','Ingredients prepped for uncertain orders; waste up from 6% to 10%'],['Operations','18 recipes and short runs; overtime up from 1,400 to 2,600 hours'],['Outbound logistics','Late changes reach dispatch; on-time delivery down from 95% to 86%']]},
+ {g:1,items:[['Marketing & sales','Urgent orders accepted without checking the kitchen plan'],['Service','Complaints up from 4 to 9 per 1,000 meals; retention down to 65%'],['Procurement','Two farms supply most specialty vegetables; quotes hold only 30 days']]},
+ {g:2,items:[['Technology development','Frequent recipe changes; packaging changes need seal and shelf-life testing'],['HR management','Know-how sits with four senior cooks; rewards pull sales and kitchen apart'],['Firm infrastructure','No monthly cash budget; Maya spends her week resolving exceptions']]}
+];
+const METRICS=[
+ {id:'rev',name:'Revenue growth',f:'(2025 − 2024 revenue) ÷ 2024 revenue',a:'+12.5%'},
+ {id:'gm',name:'Gross margin',f:'Gross profit ÷ revenue',a:'40.0% → 34.0%'},
+ {id:'om',name:'Operating margin',f:'Operating profit ÷ revenue',a:'7.5% → 2.2%'},
+ {id:'nm',name:'Net profit margin',f:'Net income ÷ revenue',a:'5.0% → 1.0%'},
+ {id:'cr',name:'Current ratio',f:'Current assets ÷ current liabilities',a:'2.24 → 1.87'},
+ {id:'cash',name:'Cash ratio',f:'Cash ÷ current liabilities',a:'0.72 → 0.31'}
+];
+const SWOTZ=[{id:'S',name:'Strengths'},{id:'W',name:'Weaknesses'},{id:'O',name:'Opportunities'},{id:'T',name:'Threats'}];
+const SW=[
+ {id:'s1',t:'Six core meals generate 70% of unit sales',z:'S'},
+ {id:'s2',t:'Trial on two recipes: waste fell from 10% to 6%, packing time fell 12%',z:'S'},
+ {id:'s3',t:'Senior cooks know how to adjust recipes to the season',z:'S'},
+ {id:'s4',t:'Operating profit fell from $180K to $60K',z:'W'},
+ {id:'s5',t:'On-time complete deliveries fell to 86%',z:'W'},
+ {id:'s6',t:'Much of the cooks’ recipe knowledge was never written down',z:'W'},
+ {id:'s7',t:'14 of 20 grocery buyers rank availability ahead of menu changes',z:'O'},
+ {id:'s8',t:'55% of surveyed subscribers prioritize convenience and predictable quality',z:'O'},
+ {id:'s9',t:'Buyers can cut orders within four weeks',z:'T'},
+ {id:'s10',t:'Household budget pressure makes price increases hard',z:'T'}
+];
+const KEYNUMS=[['Operating margin','7.5% → 2.2%'],['Gross margin','40.0% → 34.0%'],['Cost per meal','$6.00 → $6.60'],['Cash','$180K → $95K']];
+const BRIEFS={
+ quizBrief:{kick:'Station 2 · Step 1 · Performance',title:'Performance quiz',chips:['5 min','In groups','Call it out'],intro:'Eight quick “finish the sentence” questions on the case’s key operating and financial facts.',steps:['Read the sentence and agree on an answer in your group','Call out your group name and answer: first right answer wins','A wrong call locks your group out of that question'],pts:[['+50','first group to call the right answer']],go:'Start the quiz'},
+ takeBrief:{kick:'Station 3 · Worksheet · Steps 5–9',title:'First take',chips:['5 min','In groups','Worksheet'],intro:'Before any analysis, record your group’s gut call on the decision Maya has to make. You’ll come back to it at the end.',steps:['Fill in the “First take” column on your worksheet','Pick the plan your group would back right now','When time is up, call out your pick (no discussion yet)'],pts:[['+50','finished on time']],go:'Start 4-minute timer'},
+ ffBrief:{kick:'Station 4 · Step 2 · External',title:'Five Forces',chips:['15 min','Groups take turns','Big screen'],intro:'Find out which outside pressures squeeze Alder Table the hardest.',steps:['On your turn, pick a case fact and call out which force it belongs to; Jen moves it','Rate the forces your group owns: Low, Medium or High','Defend each rating with a fact from the case'],pts:[['+50','each card placed correctly'],['+50','a rating defended with a case fact']],go:'Start the game'},
+ mapBrief:{kick:'Station 5 · Step 2 · External',title:'Strategic group map',chips:['10 min','Groups take turns','Exhibit 2'],intro:'Find out where Alder Table sits next to its competitors on price and variety.',steps:['On your turn, call out a square for your offering using Exhibit 2 (e.g. “low price, some meals”); Jen places it','Explain your placement, or challenge another group’s, with case evidence','Once all four are placed, discuss Alder Table’s position, what sets it apart and the threats it faces'],pts:[['+50','a placement that holds up to a challenge'],['+50','a successful challenge backed by Exhibit 2']],go:'Start the map'},
+ vcBrief:{kick:'Station 7 · Step 3 · Internal',title:'Value chain',chips:['10 min','In groups','Poster + markers'],intro:'Find where Alder Table loses money or quality between taking an order and delivering a meal.',steps:['Work through your group’s three value chain activities on the poster','Write each weakness with the case fact that proves it','Circle the most serious one and be ready to explain how it hurts Alder Table’s performance'],pts:[['+50','finished on time'],['+50','the weakness you pick, explained with a case fact']],go:'Start 7-minute timer'},
+ finBrief:{kick:'Station 8 · Step 3 · Internal',title:'Financial indicators',chips:['10 min','In groups','Worksheet · Exhibit 1'],intro:'Work out how Alder Table’s financial health changed from 2024 to 2025.',steps:['Use Exhibit 1 and the formulas on your worksheet','Calculate revenue growth, profit margins, current ratio and cash ratio for both years','Raise your hand as soon as your group has an answer'],pts:[['+100','first group with the right answer for each indicator']],go:'Start 7-minute timer'},
+ swotBrief:{kick:'Station 9 · Step 4 · SWOT',title:'SWOT sort',chips:['5 min','Groups take turns','Big screen'],intro:'Pull together everything the class found into one SWOT.',steps:['On your turn, call out where a point goes: Strengths, Weaknesses, Opportunities or Threats','Jen moves it; a wrong call passes the turn','Be ready to say which point matters most for choosing a plan'],pts:[['+50','each point sorted correctly']],go:'Start the game'},
+ afterBrief:{kick:'Station 10 · Worksheet · Steps 5–9',title:'Final take',chips:['10 min','In groups','Worksheet · Exhibit 3'],intro:'Go back to your first take with everything the class found. Then lock in the plan your group would give Maya.',steps:['First, see where each plan could move Alder Table on the map','Fill in the “After analysis” column, checking each plan against the Exhibit 3 forecasts','Pick your final plan and note what changed your mind'],pts:[['+50','finished on time'],['+50','one fact and one number support your plan']],go:'Show the map'}
+};
+const STEPS=[
+ {id:'opening',label:'Opening',blk:0},
+ {id:'quizBrief',label:'Quiz briefing',blk:1},
+ {id:'quiz',label:'Quiz',blk:1,talk:true},
+ {id:'takeBrief',label:'First take briefing',blk:2},
+ {id:'takeTimer',label:'First take timer',blk:2,sec:240},
+ {id:'firstPicks',label:'First picks',blk:2},
+ {id:'ffBrief',label:'Five Forces briefing',blk:3},
+ {id:'ffGame',label:'Five Forces game',blk:3,sec:720},
+ {id:'ffDebrief',label:'Five Forces debrief',blk:3,sec:180,talk:true},
+ {id:'mapBrief',label:'Group map briefing',blk:4},
+ {id:'mapGame',label:'Group map game',blk:4,sec:480},
+ {id:'mapDebrief',label:'Group map debrief',blk:4,sec:120,talk:true},
+ {id:'break',label:'Break',blk:5,sec:600},
+ {id:'vcBrief',label:'Value chain briefing',blk:6},
+ {id:'vcTimer',label:'Value chain timer',blk:6,sec:420},
+ {id:'vcReveal',label:'Value chain answer key',blk:6,sec:180,talk:true},
+ {id:'finBrief',label:'Financials briefing',blk:7},
+ {id:'finTimer',label:'Financials timer',blk:7,sec:420},
+ {id:'finReveal',label:'Financials answers',blk:7,sec:180,talk:true},
+ {id:'swotBrief',label:'SWOT briefing',blk:8},
+ {id:'swotGame',label:'SWOT game',blk:8,sec:240},
+ {id:'afterBrief',label:'Final take briefing',blk:9},
+ {id:'mapAlt',label:'Map + alternatives',blk:9,sec:180,talk:true},
+ {id:'afterTimer',label:'Final take timer',blk:9,sec:360},
+ {id:'finalPicks',label:'Final picks',blk:10},
+ {id:'share',label:'Share and discuss',blk:10,talk:true},
+ {id:'podium',label:'Closing podium',blk:11,talk:true}
+];
+const BLOCKS=[['Open',5],['Quiz',5],['First take',5],['Five Forces',15],['Group map',10],['Break',10],['Value chain',10],['Financials',10],['SWOT',5],['Final take',10],['Share',5],['Close',5]];
+
+/* ======================= state ======================= */
+const KEY='alder-shift-board-v2';
+function fresh(){return{
+ step:0,home:false,scores:[0,0,0],
+ timer:{total:0,left:0,run:false,end:0,owner:null},
+ quiz:{i:0,rev:false,win:{},lock:{},debrief:false},
+ awards:{},picks:{first:[null,null,null],final:[null,null,null]},
+ ff:{placed:{},turn:0,sel:null,rate:{}},
+ map:{cells:{},turn:0,sel:null,key:false},
+ alt:[false,false,false],vc:{leak:null},fin:{rev:{},win:{}},
+ swot:{placed:{},turn:0,sel:null},
+ share:{g:0,phase:'share',done:[false,false,false]},
+ podium:{rev:false},rec:{issue:'',plan:'',los:'',validate:'',stop:''},
+ beat:false,vol:0.5,lastTrays:[0,0,0]
+}}
+let S=fresh();
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);S=Object.assign(fresh(),d)}}catch(e){}
+if(S.timer.run){S.timer.left=Math.max(0,(S.timer.end-Date.now())/1000);if(S.timer.left<=0)S.timer.run=false}
+S.beat=false;
+let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},200)}
+
+/* ======================= helpers ======================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const stepObj=()=>STEPS[S.step];
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const planLabel=k=>{const p=PLANS.find(x=>x.k===k);return p?p.k+' · '+p.name:'Not set'};
+function toast(msg,bad){const t=document.createElement('div');t.className='toast'+(bad?' bad':'');t.textContent=msg;$('#stage').appendChild(t);setTimeout(()=>t.remove(),2000)}
+function hdr(title,sub,opts){opts=opts||{};return `<header class="hdr"><div class="l"><span class="ttl">${title}</span>${opts.badge?`<span class="badge">${opts.badge}</span>`:''}${sub?`<span class="sub">${sub}</span>`:''}</div><div class="r">${opts.right||''}${opts.scores!==false?tags():''}${opts.timer?`<span class="tm tleft">${fmt(S.timer.left)}</span>`:''}</div></header>`}
+function tags(){return `<div class="tags">${G.map((g,i)=>`<span class="tag" style="color:var(--g${i})">${g.short.toUpperCase()} ${S.scores[i]}</span>`).join('')}</div>`}
+function plus(p,label){return `<div class="row">${G.map((g,i)=>`<button class="btn g gc${i}" data-act="pts" data-g="${i}" data-p="${p}">+${p} ${g.short}</button>`).join('')}${label?`<span class="muted">${label}</span>`:''}</div>`}
+function onTimeRow(id){const a=S.awards[id]||[false,false,false];return `<div class="row"><span style="font-weight:700;margin-right:4px">On time +50:</span>${G.map((g,i)=>`<button class="btn g gc${i}${a[i]?' on':''}" data-act="ontime" data-id="${id}" data-g="${i}">${a[i]?'✓ ':''}${g.short}</button>`).join('')}</div>`}
+function trays(n){return `<div class="trays" data-n="${n}">${Array.from({length:n},()=>'<i></i>').join('')}</div>`}
+
+/* ======================= screens ======================= */
+function brief(id){const d=BRIEFS[id];return `<div class="brief"><article>
+ <div class="top"><div><div class="kick">${d.kick}</div><h1>${d.title}</h1></div><div class="chips">${d.chips.map(c=>`<span>${c}</span>`).join('')}</div></div>
+ <div class="body"><div style="display:flex;flex-direction:column;gap:16px"><p class="intro">${d.intro}</p><ol>${d.steps.map((s,i)=>`<li><span class="num">${i+1}</span><span>${s}</span></li>`).join('')}</ol></div>
+ <div style="display:flex;flex-direction:column;gap:14px"><div class="pts-box"><span class="cap">Meals up for grabs</span>${d.pts.map(p=>`<span><b>${p[0]}</b> ${p[1]}</span>`).join('')}</div>
+ <button class="go" data-act="next">${d.go}</button><button class="btn" style="border:0" data-act="home">See the shelf</button></div></div></article></div>`}
+
+function vOpening(){return `<div style="flex:1;display:grid;grid-template-columns:minmax(0,1fr) 470px;background:var(--green);color:#fff">
+ <section style="padding:56px;display:flex;flex-direction:column;gap:22px"><span class="cap" style="color:var(--mint);font-size:16px;letter-spacing:.12em">BADM 470 · Case Facilitation #4</span>
+ <h1 style="margin:0;font-family:var(--display);font-weight:900;font-stretch:75%;font-size:120px;line-height:.88;text-transform:uppercase">Stock<br>the Shelf</h1>
+ <p style="margin:0;font-size:22px;line-height:1.45;max-width:34ch;color:var(--mist)">September 14, 2026. Maya Chen brings a photo of an empty refrigerated shelf to a management meeting. By September 30, she needs a recommendation that keeps customers happy without straining the kitchen further.</p>
+ <div style="margin-top:auto"><span class="cap" style="color:var(--mint)">Your facilitators</span><div style="font-size:20px;font-weight:600;margin-top:6px">Jen · Kaitlyn · Saba</div></div></section>
+ <aside style="background:#fff;color:var(--ink);padding:44px 40px;display:flex;flex-direction:column;gap:18px"><span class="ttl" style="font-size:30px">How to play</span>
+ <div style="display:flex;flex-direction:column;gap:10px">${G.map((g,i)=>`<div class="row gc${i}"><span class="tray" style="width:44px"></span><span class="gname" style="font-size:24px">${g.name}</span></div>`).join('')}</div>
+ <ul style="margin:0;padding:0 0 0 20px;display:flex;flex-direction:column;gap:10px;font-size:18px;line-height:1.35"><li>Every <b>50 points</b> stocks one meal on your group’s shelf.</li><li>Earn points for correct answers, finishing on time and backing claims with case facts.</li><li>The fullest shelf at the end wins a prize.</li></ul>
+ <button class="btn yel" style="margin-top:auto;font-size:20px;padding:16px" data-act="next">Start the shift</button></aside></div>`}
+
+function vQuiz(){const Q=S.quiz;
+ if(Q.debrief){return hdr('Performance quiz','Quick debrief',{badge:'DEBRIEF',timer:true})+`<div class="main"><div class="white" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:40px 50px"><span class="cap">We ask the class</span><p class="qtext" style="max-width:36ch">Sales went up but profit fell. Is this a demand problem or a cost problem? What’s the evidence?</p>${plus(50,'for answers backed by the case')}</div><div class="row" style="justify-content:flex-end"><button class="btn" data-act="qback">Back to questions</button><button class="btn solid" data-act="next">Next: First take</button></div></div>`}
+ const q=QUIZ[Q.i],parts=q.q.split('___'),lock=Q.lock[Q.i]||[false,false,false],win=Q.win[Q.i];
+ return hdr('Performance quiz',`Question ${Q.i+1} of ${QUIZ.length}`,{timer:true})+`<div class="main">
+ <p class="qtext">${esc(parts[0])}<mark>${Q.rev?esc(q.o[q.a]):'&nbsp;?&nbsp;'}</mark>${esc(parts[1]||'')}</p>
+ <div class="opts">${q.o.map((o,i)=>`<div class="opt${Q.rev?(i===q.a?' ok':' dim'):''}"><span class="k">${i+1}</span><span>${esc(o)}</span></div>`).join('')}</div>
+ ${Q.rev?`<div class="ask"><b>We ask the class:</b> ${esc(q.why)}${win!=null?` <span class="gname gc${win}" style="margin-left:8px">· ${G[win].name} +50</span>`:''}</div>`:''}
+ <div class="row" style="margin-top:auto;justify-content:space-between">
+  <div class="row">${Q.rev?'':`<span style="font-weight:700">Who called it?</span>${G.map((g,i)=>`<span class="row gc${i}" style="gap:3px"><button class="btn g" data-act="qok" data-g="${i}" ${lock[i]?'disabled':''}>✓ ${g.name}</button><button class="btn g" data-act="qno" data-g="${i}" ${lock[i]?'disabled':''} aria-label="${g.name} wrong">${lock[i]?'Locked out':'✗'}</button></span>`).join('')}<button class="btn" data-act="qrev">Reveal</button>`}</div>
+  <div class="row"><button class="btn" data-act="qprev" ${Q.i===0?'disabled':''}>Previous</button>${Q.i<QUIZ.length-1?`<button class="btn solid" data-act="qnext">Next question</button>`:`<button class="btn solid" data-act="qdebrief">1-minute debrief</button>`}</div></div></div>`}
+
+function swotPanel(){return `<aside style="background:var(--bg);padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--line);min-height:0"><span class="cap">What the class found · from the SWOT</span><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">${SWOTZ.map(z=>{let items=SW.filter(c=>S.swot.placed[c.id]===z.id);if(!items.length)items=SW.filter(c=>c.z===z.id).slice(0,2);return `<div class="white" style="overflow:hidden;border-radius:8px"><div style="background:var(--green);color:#fff;padding:4px 9px;font-family:var(--display);font-weight:900;font-stretch:75%;font-size:15px;text-transform:uppercase">${z.name}</div><div style="padding:6px 9px;display:flex;flex-direction:column;gap:4px">${items.slice(0,3).map(c=>`<span style="font-size:12.5px;line-height:1.3">• ${esc(c.t)}</span>`).join('')}</div></div>`}).join('')}</div><span class="cap" style="margin-top:4px">Key numbers · 2024 → 2025</span><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">${KEYNUMS.map(k=>`<div class="white" style="border-radius:8px;padding:7px 10px"><div style="font-size:12.5px;color:var(--muted)">${k[0]}</div><div style="font-family:var(--mono);font-weight:700;font-size:17px">${k[1]}</div></div>`).join('')}</div><span style="font-size:12.5px;color:var(--muted)">Exhibit 3 numbers on your worksheet are forecasts, not results.</span></aside>`}
+
+function vPaper(title,sub,mins,id,stepsTxt,nextLabel,side){
+ const center=`<div class="pcenter"><span class="big tleft" role="timer">${fmt(S.timer.left)}</span><div style="width:${side?560:940}px;display:flex;flex-direction:column;gap:8px">${trays(mins)}<div class="shelfbar"></div><div class="row" style="justify-content:space-between;font-size:14px;color:var(--muted);font-weight:600"><span>${mins}:00</span><span>A meal comes off the shelf every minute</span><span>0:00</span></div></div>${side?`<ol class="psteps" style="grid-template-columns:1fr;width:560px">${stepsTxt.map((s,i)=>`<li><b>${i+1}</b>${s}</li>`).join('')}</ol>`:''}</div>`;
+ return hdr(title,sub,{})+`<div class="paper${side?' side':''}">${center}${side?swotPanel():''}</div><div class="pfoot">${side?onTimeRow(id):`<ol class="psteps">${stepsTxt.map((s,i)=>`<li><b>${i+1}</b>${s}</li>`).join('')}</ol>`}<div class="row">${side?'':onTimeRow(id)}<button class="btn solid" data-act="next">${nextLabel}</button></div></div>`}
+
+function pickButtons(which,g){const cur=S.picks[which][g];return PLANS.map(p=>`<button class="btn${cur===p.k?' solid':''}" style="text-align:left;${which==='final'?'flex:1;text-align:center;':''}" data-act="pick" data-w="${which}" data-g="${g}" data-k="${p.k}">${which==='final'?p.k:p.k+' · '+p.name}</button>`).join('')}
+function vFirstPicks(){return hdr('First picks','Call out the plan you’d back right now',{right:'<span class="badge" style="font-size:15px">No discussion yet</span>'})+`<div class="main" style="padding-top:28px;gap:22px"><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">${G.map((g,i)=>`<div class="white gc${i}" style="border-top:10px solid var(--c);padding:20px;display:flex;flex-direction:column;gap:12px"><span class="gname" style="font-size:32px">${g.name}</span>${pickButtons('first',i)}</div>`).join('')}</div><p style="margin:0;font-size:19px;color:var(--soft);text-align:center">We’ll reveal these next to your final picks at the end.</p><div class="row" style="justify-content:flex-end;margin-top:auto"><button class="btn solid" data-act="next">Next: Five Forces</button></div></div>`}
+
+function sortGame(key,cards,zones,cols,zoneExtra){const st=S[key],left=cards.filter(c=>!st.placed[c.id]),t=st.turn;
+ return `<div class="row" style="justify-content:space-between"><span style="font-size:17px;font-weight:700" class="gc${t}">Your turn: <span class="gname" style="font-size:20px">${G[t].name}</span> <span class="muted" style="font-weight:500;font-size:14px">· pass to</span> ${G.map((g,i)=>i===t?'':`<button class="btn g gc${i}" style="padding:4px 9px;font-size:13px" data-act="turn" data-k="${key}" data-g="${i}">${g.short}</button>`).join('')}</span><span class="muted">${left.length} of ${cards.length} left · click a card, then its box</span></div>
+ <div class="tray-area">${left.length?left.map(c=>`<button class="card${st.sel===c.id?' sel':''}" draggable="true" data-act="sel" data-k="${key}" data-id="${c.id}">${esc(c.t)}</button>`).join(''):'<span class="muted" style="padding:6px">All sorted.</span>'}</div>
+ <div style="flex:1;min-height:0;display:grid;grid-template-columns:${cols};${key==='swot'?'grid-template-rows:repeat(2,minmax(0,1fr));':''}gap:12px">${zones.map(z=>`<div class="zone${st.sel?' armed':''}" data-drop="${z.id}" data-k="${key}"><div class="zh">${z.name}</div><div class="zb">${cards.filter(c=>st.placed[c.id]===z.id).map(c=>`<div class="placed">${esc(c.t)}</div>`).join('')}${zoneExtra?zoneExtra(z):''}</div></div>`).join('')}</div>`}
+
+function vFF(){return hdr('Five Forces','Call out the force · Jen moves it · +50 a meal',{timer:true})+`<div class="main" style="gap:12px">${sortGame('ff',FF,FORCES,'repeat(5,minmax(0,1fr))',f=>`<div style="margin-top:auto;display:flex;flex-direction:column;gap:5px"><span class="gc${f.g}" style="font-size:12px;font-weight:800;color:var(--c)">${G[f.g].name.toUpperCase()} RATES IT</span><div class="seg">${['Low','Med','High'].map(r=>`<button class="${S.ff.rate[f.id]===r?'on':''}" data-act="rate" data-f="${f.id}" data-r="${r}">${r}</button>`).join('')}</div></div>`)}<div class="row" style="justify-content:space-between"><span class="ask" style="padding:8px 12px;font-size:15.5px"><b>We ask:</b> Which fact proves the rating? Why High and not Medium?</span><button class="btn solid" data-act="next">Debrief</button></div></div>`}
+
+function vFFDebrief(){return hdr('Five Forces','',{badge:'DEBRIEF',timer:true})+`<div class="main" style="display:grid;grid-template-columns:380px minmax(0,1fr);gap:26px"><section class="white" style="padding:18px 20px;display:flex;flex-direction:column;gap:10px"><span class="cap">What the class decided</span>${FORCES.map(f=>{const r=S.ff.rate[f.id];return `<div class="row" style="justify-content:space-between;border-bottom:1px solid #E3E9E6;padding-bottom:8px"><span style="font-size:17px;font-weight:600">${f.name}</span><span style="background:${r==='High'?'var(--ink)':'var(--bg)'};color:${r==='High'?'#fff':'var(--ink)'};border-radius:5px;padding:3px 10px;font-weight:700;font-size:14px">${r||'Not rated'}</span></div>`}).join('')}<span class="muted" style="margin-top:auto;font-size:14px">${FF.filter(c=>S.ff.placed[c.id]).length} of ${FF.length} cards placed</span></section>
+ <section style="display:flex;flex-direction:column;gap:12px"><span class="cap">We ask the class</span>${['Which force hurts Alder Table the most? What fact proves it?','Why High and not Medium?','Which of the three plans does that force favour?'].map((q,i)=>`<div class="white" style="padding:16px 20px;display:flex;gap:16px;align-items:flex-start"><span class="num">${i+1}</span><span style="font-family:var(--display);font-weight:700;font-size:26px;line-height:1.2">${q}</span></div>`).join('')}<div class="row" style="margin-top:auto;justify-content:space-between">${plus(50)}<button class="btn solid" data-act="next">Next: Group map</button></div></section></div>`}
+
+function mapGrid(mode){const M=S.map,armed=mode==='game'&&M.sel;const by={};OFFERS.forEach(o=>{const c=M.cells[o.id];if(c!=null)(by[c]=by[c]||[]).push(o)});
+ const T={};if(mode==='alt'){const a=M.cells.alder!=null?M.cells.alder:5,r=Math.floor(a/3),c=a%3;T.A=r*3+Math.max(0,c-1);T.B=Math.max(0,r-1)*3+c;T.alder=a}
+ return `<div class="mapwrap"><div class="ylab"><span>High<small>retail price</small></span><span>Mid<small>retail price</small></span><span>Low<small>retail price</small></span></div>
+ <div class="grid9" id="grid9">${Array.from({length:9},(_,i)=>`<div class="cell${armed?' armed':''}" data-cell="${i}"><span class="cn">${i+1}</span>${M.key&&mode==='game'&&OFFERS.some(o=>o.key===i)?'<span class="key">Exhibit 2 ✓</span>':''}${mode==='alt'&&S.alt[1]&&T.B===i&&T.B!==T.alder?'<span class="altchip" id="altB">B. Premium flexible</span>':''}${(by[i]||[]).map(o=>mode==='game'?`<button class="offer${o.id==='alder'?' alder':''}${M.sel===o.id?' sel':''}" data-act="msel" data-id="${o.id}"><b>${o.name}</b>${o.sub}</button>`:`<div class="offer${o.id==='alder'?' alder':''}" ${o.id==='alder'?'id="alderChip"':''}><b>${o.name}</b>${o.sub}</div>`).join('')}${mode==='alt'&&S.alt[0]&&T.A===i&&T.A!==T.alder?'<span class="altchip" id="altA">A. Focused range</span>':''}${mode==='alt'&&S.alt[2]&&T.alder===i?'<span style="font-size:13px;font-weight:700;color:var(--soft)">C. Partner: stays here</span>':''}</div>`).join('')}${mode==='alt'?'<svg id="arrows"></svg>':''}</div>
+ <div class="xlab"><span>Few meals</span><span>Some</span><span>Broad menu</span></div></div>`}
+
+function vMapGame(){const M=S.map,left=OFFERS.filter(o=>M.cells[o.id]==null),t=M.turn;
+ return hdr('Strategic group map','Call out a square · Jen places it',{timer:true})+`<div class="main" style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px">${mapGrid('game')}
+ <aside style="display:flex;flex-direction:column;gap:10px;min-height:0"><div class="white gc${t}" style="padding:12px 14px"><span class="cap">Your turn</span><div class="gname" style="font-size:24px;margin-top:4px">${G[t].name}</div><div class="row" style="margin-top:6px"><span class="muted" style="font-size:13px">Pass to</span>${G.map((g,i)=>i===t?'':`<button class="btn g gc${i}" style="padding:3px 8px;font-size:12.5px" data-act="turn" data-k="map" data-g="${i}">${g.short}</button>`).join('')}</div></div>
+ <div class="white" style="padding:12px 14px;display:flex;flex-direction:column;gap:8px"><span class="cap">${left.length?'Left to place':'All four placed'}</span>${left.map(o=>`<button class="offer${o.id==='alder'?' alder':''}${M.sel===o.id?' sel':''}" style="text-align:left" data-act="msel" data-id="${o.id}"><b>${o.name}</b>${o.sub}</button>`).join('')}<span class="muted" style="font-size:13px">Click a card, then a square. Click a placed card to move it.</span></div>
+ <div class="ask" style="font-size:15px"><b>We ask the other groups:</b> Agree? If not, which square, and what in Exhibit 2 says so?</div>
+ <div style="display:flex;flex-direction:column;gap:6px;margin-top:auto">${plus(50)}<div class="row"><button class="btn" data-act="mkey">${M.key?'Hide':'Show'} Exhibit 2 check</button><button class="btn solid" data-act="next">Debrief</button></div></div></aside></div>`}
+
+function vMapDebrief(){return hdr('Strategic group map','',{badge:'DEBRIEF',timer:true,right:'<span style="border:2px solid #fff;border-radius:6px;padding:3px 10px;font-weight:700;font-size:14px">✓ Map saved</span>'})+`<div class="main" style="display:grid;grid-template-columns:600px minmax(0,1fr);gap:22px">${mapGrid('view')}<section style="display:flex;flex-direction:column;gap:12px"><span class="cap">We ask the class</span>${['Where does Alder Table sit, and who is it closest to?','What sets it apart from the others on the map?','Which competitor is the biggest threat, and why?'].map((q,i)=>`<div class="white" style="padding:15px 18px;display:flex;gap:14px"><span class="num">${i+1}</span><span style="font-family:var(--display);font-weight:700;font-size:23px;line-height:1.2">${q}</span></div>`).join('')}<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">${plus(50,'for answers backed by the case')}<div class="row" style="justify-content:flex-end"><button class="btn solid" data-act="next">Next: Break</button></div></div></section></div>`}
+
+function vBreak(){return `<div style="flex:1;background:var(--green);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+ <span class="badge" style="font-size:22px;padding:6px 16px">KITCHEN’S ON BREAK</span><span class="big tleft" role="timer" style="font-size:250px">${fmt(S.timer.left)}</span>
+ <p style="margin:0;font-size:24px;color:var(--mist)">Back in ten. Coming up: <b style="color:#fff">value chain</b>, then <b style="color:#fff">financials</b>.</p>
+ <div class="row" style="margin-top:12px"><button class="btn yel" data-act="beat">${S.beat?'Stop the beat':'Play the beat'}</button><button class="btn" style="background:transparent;color:#fff;border-color:#fff" data-act="next">Back from break</button></div></div>`}
+
+function vVCReveal(){return hdr('Value chain','Check your poster against what the case says',{badge:'ANSWER KEY',timer:true})+`<div class="main" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr) auto;gap:16px">${VC.map(col=>`<section class="vccol gc${col.g}"><div class="vchead"><span class="gname" style="color:#fff;font-size:24px">${G[col.g].name}</span><span style="font-size:14px;font-weight:600">your 3 activities</span></div>${col.items.map(it=>{const on=S.vc.leak===it[0];return `<button class="vcitem${on?' leak':''}" data-act="leak" data-id="${esc(it[0])}">${on?'<span class="stamp">BIGGEST LEAK · CLASS VOTE</span>':''}<b>${it[0]}</b>${it[1]}</button>`}).join('')}</section>`).join('')}
+ <div style="grid-column:1/-1;display:flex;gap:12px;align-items:center"><div class="ask" style="flex:1;font-size:15.5px"><b>We ask each group:</b> Which one did you circle as most serious? How does it hurt Alder Table’s performance? <span class="muted">(Click an activity to mark the class vote.)</span></div>${plus(50)}<button class="btn solid" data-act="next">Next: Financials</button></div></div>`}
+
+function vFinReveal(){const F=S.fin;return hdr('Financial indicators','Answers · 2024 → 2025',{timer:true})+`<div class="main"><div style="flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:12px">${METRICS.map(m=>{const w=F.win[m.id];return `<div class="metric${w!=null?' won gc'+w:''}"><span class="ttl" style="font-size:22px;white-space:normal">${m.name}</span><span style="font-size:14px;color:var(--muted)">${m.f}</span><span class="ans${F.rev[m.id]?'':' hid'}">${F.rev[m.id]?m.a:'• • •'}</span>${w!=null?`<div class="row"><span class="tag gc${w}" style="background:var(--c);color:#fff;font-size:15px">First correct: ${G[w].name} +100</span><button class="btn" style="padding:4px 9px;font-size:13px" data-act="finundo" data-m="${m.id}">Undo</button></div>`:`<div class="row">${G.map((g,i)=>`<button class="btn g gc${i}" style="padding:5px 9px;font-size:13.5px" data-act="finwin" data-m="${m.id}" data-g="${i}">${g.short}</button>`).join('')}<button class="btn" style="padding:5px 9px;font-size:13.5px" data-act="finrev" data-m="${m.id}">${F.rev[m.id]?'Hide':'Reveal'}</button></div>`}</div>`}).join('')}</div><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div class="ask" style="flex:1;font-size:16px"><b>We ask the class:</b> What changed more, price per meal or cost per meal? What does the drop in cash mean for paying for a new plan?</div><button class="btn solid" data-act="next">Next: SWOT</button></div></div>`}
+
+function vSwot(){return hdr('SWOT sort','Call out where it goes · Jen moves it · +50 a meal',{timer:true})+`<div class="main" style="gap:12px">${sortGame('swot',SW,SWOTZ,'repeat(2,minmax(0,1fr))')}<div class="row" style="justify-content:space-between"><span class="ask" style="padding:8px 12px;font-size:15.5px"><b>We ask:</b> Which point matters most for choosing a plan?</span><button class="btn solid" data-act="next">Next: Final take</button></div></div>`}
+
+function vMapAlt(){const info=[['A','Focused range','Move left: fewer meals, a more focused menu'],['B','Premium flexible','Move up: higher price, more premium positioning'],['C','Production partner','Stay in place: same price and variety']];
+ return hdr('Where could each plan take us?','Your saved map + the three alternatives',{timer:true,scores:false})+`<div class="main" style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px">${mapGrid('alt')}
+ <aside style="display:flex;flex-direction:column;gap:10px"><div class="white" style="overflow:hidden"><div style="background:var(--green);color:#fff;padding:10px 14px"><span class="ttl" style="font-size:18px">Strategic alternatives</span></div><div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px">${info.map((p,i)=>`<button class="row" style="flex-wrap:nowrap;align-items:flex-start;background:${S.alt[i]?'var(--alt)':'#fff'};border:1.5px solid ${S.alt[i]?'var(--g1)':'var(--line)'};border-radius:8px;padding:8px;text-align:left" data-act="alt" data-i="${i}"><span class="num" style="width:30px;height:30px;font-size:15px;background:var(--alt);color:var(--alt-ink)">${p[0]}</span><span style="font-size:14px"><b>${p[1]}</b><br>${S.alt[i]?p[2]:'<span class="muted">Click to reveal</span>'}</span></button>`).join('')}</div></div>
+ <div style="background:var(--alder);color:var(--alder-ink);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4">Arrows show possible positioning moves, not confirmed future prices or menu sizes.</div>
+ <div class="ask" style="font-size:14.5px"><b>We ask the class:</b> Which move puts Alder Table somewhere less crowded? Which one risks running into a competitor?</div><button class="btn solid" style="margin-top:auto" data-act="next">Start the final take timer</button></aside></div>`}
+
+function vFinalPicks(){const f=S.picks.first,fi=S.picks.final;const cnt=(arr,k)=>arr.filter(x=>x===k).length;
+ return hdr('Final picks','Each group calls out its final plan · Jen taps it in',{right:'<span class="badge" style="font-size:15px">About 30 seconds</span>'})+`<div class="main"><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">${G.map((g,i)=>{const ch=f[i]&&fi[i]?(f[i]!==fi[i]):null;return `<div class="white gc${i}" style="border-top:8px solid var(--c);padding:14px 16px;display:flex;flex-direction:column;gap:9px"><div class="row" style="justify-content:space-between"><span class="gname" style="font-size:26px">${g.name}</span>${ch==null?'':`<span class="badge" style="font-size:13px;${ch?'':'background:var(--bg);color:var(--soft)'}">${ch?'CHANGED':'SAME'}</span>`}</div><span style="font-size:14px;color:var(--muted)">First take: <b style="color:var(--ink)">${planLabel(f[i])}</b></span><span style="font-size:14px;color:var(--muted)">Final pick:</span><div class="row" style="flex-wrap:nowrap">${pickButtons('final',i)}</div></div>`}).join('')}</div>
+ <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px"><div class="white" style="padding:16px 20px;display:flex;flex-direction:column;gap:12px"><span class="ttl" style="font-size:18px">How the class moved</span>${PLANS.map(p=>{const a=cnt(f,p.k),b=cnt(fi,p.k);return `<div style="display:grid;grid-template-columns:210px minmax(0,1fr) 64px;align-items:center;gap:14px"><span style="font-weight:700">${p.k} · ${p.name}</span><div style="display:flex;flex-direction:column;gap:4px"><div style="width:${a/3*100}%;min-width:2px;height:12px;background:var(--line2);border-radius:3px"></div><div style="width:${b/3*100}%;min-width:2px;height:12px;background:var(--green);border-radius:3px"></div></div><span style="font-family:var(--mono);font-weight:700">${a} → ${b}</span></div>`}).join('')}<span style="font-size:13.5px;color:var(--muted);margin-top:auto">Grey = first take · Green = final pick</span></div>
+ <div style="background:var(--green);color:#fff;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;justify-content:center"><span class="cap" style="color:var(--mint)">Up next</span><span class="ttl" style="font-size:30px">Share and discuss</span><span style="font-size:16px;color:var(--mist);line-height:1.4">Each group gets 1 minute to explain its pick, then we ask our questions.</span><button class="btn yel" style="align-self:flex-start;margin-top:6px" data-act="next">Start with Operations</button></div></div></div>`}
+
+function vShare(){const sh=S.share,g=sh.g,f=S.picks.first[g],fi=S.picks.final[g];const ch=f&&fi?f!==fi:null;
+ const strip=`<div class="row" style="flex-wrap:nowrap">${G.map((gg,i)=>{const st=i===g?(sh.phase==='share'?'sharing now':'our questions now'):(sh.done[i]?'done':'up later');const sty=i===g?'background:var(--c);color:#fff;border:2px solid var(--c)':sh.done[i]?'background:#fff;color:var(--c);border:2px solid var(--c)':'background:#fff;color:var(--muted);border:2px dashed var(--line2)';return `<button class="gc${i}" data-act="shareg" data-g="${i}" style="flex:1;text-align:left;border-radius:8px;padding:8px 12px;font-weight:700;font-size:15px;${sty}">${sh.done[i]&&i!==g?'✓ ':''}${gg.name} · ${st}</button>`}).join('')}</div>`;
+ const left=`<section class="white gc${g}" style="border-top:10px solid var(--c);padding:20px 22px;display:flex;flex-direction:column;gap:14px"><span class="gname" style="font-size:40px;line-height:1">${G[g].name}</span><div><div style="font-size:15px;color:var(--muted)">First take</div><div style="font-size:20px;font-weight:600">${planLabel(f)}</div></div><div><div style="font-size:15px;color:var(--muted)">Final pick</div><div style="font-size:24px;font-weight:800">${planLabel(fi)}</div></div>${ch==null?'':`<span class="badge" style="align-self:flex-start;font-size:15px;${ch?'':'background:var(--bg);color:var(--soft)'}">${ch?'CHANGED THEIR MIND':'SAME PICK'}</span>`}</section>`;
+ const right=sh.phase==='share'?`<section class="white" style="padding:20px 24px;display:flex;flex-direction:column;gap:14px"><div class="row" style="justify-content:space-between"><span class="ttl gc${g}" style="color:var(--c);font-size:36px">${G[g].name}, you’re up</span><span class="tm tleft" style="background:var(--ink);color:#fff">${fmt(S.timer.left)}</span></div><span style="font-size:18px;color:var(--muted)">Read these three rows from your worksheet:</span>${['Your strategic issue, in one sentence','The plan you recommend, and why','The fact and the number behind it'].map((t,i)=>`<div class="row" style="flex-wrap:nowrap;gap:14px"><span class="num">${i+1}</span><span style="font-size:24px;font-weight:600">${t}</span></div>`).join('')}<div class="row" style="margin-top:auto;justify-content:flex-end"><button class="btn solid" data-act="shareq">Our questions</button></div></section>`
+ :`<section class="white" style="padding:20px 24px;display:flex;flex-direction:column;gap:12px"><div class="row" style="justify-content:space-between"><span class="ttl" style="font-size:30px">Our questions</span><span class="tm tleft" style="background:var(--ink);color:#fff">${fmt(S.timer.left)}</span></div>${['What changed your mind since your first take?','Can Alder Table afford that plan with the cash it has?','What would make your plan fail?'].map((t,i)=>`<div class="row" style="flex-wrap:nowrap;gap:14px;align-items:flex-start;border-bottom:${i<2?'1px solid #E3E9E6':'0'};padding-bottom:10px"><span class="num">${i+1}</span><span style="font-size:23px;font-weight:600;line-height:1.25">${t}</span></div>`).join('')}<div class="row" style="margin-top:auto;justify-content:space-between"><span class="muted">Anyone else want to challenge?</span><div class="row"><button class="btn g gc${g}" data-act="pts" data-g="${g}" data-p="50">+50 ${G[g].short}</button>${g<2?`<button class="btn solid" data-act="sharenext">Next: ${G[g+1].name} shares</button>`:`<button class="btn solid" data-act="next">Closing</button>`}</div></div></section>`;
+ return hdr('Share and discuss','1 minute to share, then our questions · one group at a time',{scores:false})+`<div class="main" style="gap:12px">${strip}<div style="flex:1;min-height:0;display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px">${left}${right}</div></div>`}
+
+function vPodium(){const order=[0,1,2].sort((a,b)=>S.scores[b]-S.scores[a]);const vis=[order[1],order[0],order[2]];const hts=[250,200,150];const lbl=['1st','2nd','3rd'];
+ const cols=S.podium.rev?vis.map(g=>{const rank=order.indexOf(g),n=Math.floor(S.scores[g]/50);return `<div class="pcol gc${g}"><div class="ptrays">${Array.from({length:Math.min(n,40)},()=>'<span class="tray"></span>').join('')}</div><div class="pblock" style="height:${hts[rank]}px"><span class="pl">${lbl[rank]}</span><span class="pn">${G[g].name}</span><span class="pp">${S.scores[g]} pts</span></div></div>`}).join(''):vis.map(()=>`<div class="pcol"><div class="mystery">?</div></div>`).join('');
+ const R=S.rec,f=(k,l)=>`<div class="rec"><label for="rec-${k}">${l}</label><textarea id="rec-${k}" data-field="${k}">${esc(R[k])}</textarea></div>`;
+ return `<div style="flex:1;display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0"><section style="padding:30px 36px 0;display:flex;flex-direction:column;gap:14px"><div class="row" style="justify-content:space-between"><span class="ttl" style="font-size:44px">Fullest shelf wins a prize</span>${S.podium.rev?'<button class="btn" data-act="confetti">Celebrate</button>':'<button class="btn solid" data-act="drumroll">Play drumroll + reveal</button>'}</div><div class="pod">${cols}</div></section>
+ <aside style="background:#fff;padding:24px 26px;display:flex;flex-direction:column;gap:9px"><span class="cap">Closing debrief</span><span class="ttl" style="font-size:28px;white-space:normal">Our recommendation to Maya</span>${f('issue','Strategic issue')}${f('plan','Our plan, and why')}${f('los','Line of sight: the fact and number behind it')}${f('validate','Validate first · who leads')}${f('stop','Stop or change if (our 5 indicators)')}<span class="muted" style="margin-top:auto;font-size:14px">Thanks for stocking the shelf with us.</span></aside></div>`}
+
+function vHome(){const nxt=STEPS[S.step],bi=nxt.blk;
+ return `<header class="hdr"><div class="l" style="align-items:center"><div style="width:44px;height:44px;border-radius:10px;background:#fff;color:var(--green);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:20px;font-stretch:75%">AT</div><div><div class="ttl" style="font-size:30px">Stock the Shelf</div><div class="sub" style="font-size:14px">Alder Table Foods · Case Facilitation #4</div></div></div><div class="r"><div style="background:#fff;color:var(--ink);border-radius:8px;padding:6px 12px;display:flex;gap:8px;align-items:center"><span style="font-family:var(--display);font-weight:800;font-stretch:75%;font-size:14px;color:var(--bad);letter-spacing:.06em">SEPT 30</span><span style="font-weight:600;font-size:15px">Maya’s deadline</span></div><button class="btn yel" data-act="home">Back to: ${esc(nxt.label)}</button></div></header>
+ <div class="main" style="flex-direction:row;gap:24px"><section class="fridge" aria-label="Group shelves"><div class="led"></div>${G.map((g,i)=>{const n=Math.floor(S.scores[i]/50),slots=19,shown=Math.min(n,slots);return `<div class="shelf gc${i}"><div class="slots">${Array.from({length:shown},(_,k)=>`<span class="tray${k>=S.lastTrays[i]?' new':''}"></span>`).join('')}${Array.from({length:Math.max(0,slots-shown)},()=>'<span class="slot"></span>').join('')}${n>slots?`<span class="gname" style="font-size:18px;margin-left:4px">+${n-slots}</span>`:''}</div><div class="plank"></div><div class="label"><span class="n">${g.name}</span><span class="p">${S.scores[i]}</span><span class="m">pts · ${n} meal${n===1?'':'s'}</span><button data-act="pts" data-g="${i}" data-p="-50" aria-label="Minus 50 ${g.name}">−50</button><button data-act="pts" data-g="${i}" data-p="50" aria-label="Plus 50 ${g.name}">+50</button></div></div>`}).join('')}</section>
+ <aside style="width:250px;display:flex;flex-direction:column;gap:12px;flex:none"><div class="white" style="padding:14px 16px"><span class="cap">Up next</span><div style="font-weight:800;font-size:20px;margin-top:4px">${esc(nxt.label)}</div></div><div class="white" style="padding:14px 16px;display:flex;flex-direction:column;gap:7px;flex:1"><span class="cap">Every 50 points = 1 meal</span><span style="font-size:15px"><b>+50</b> correct card or answer</span><span style="font-size:15px"><b>+50</b> done on time</span><span style="font-size:15px"><b>+50</b> backed by a case fact</span><span style="font-size:15px"><b>+100</b> first right financial answer</span></div></aside></div>
+ <nav class="strip" style="padding:0 36px 18px" aria-label="Session">${BLOCKS.map((b,i)=>`<div class="${i<bi?'done':i===bi?'now':''}" style="flex:${b[1]}">${b[0]}</div>`).join('')}</nav>`}
+
+function render(){const st=stepObj();let h;
+ if(S.home){h=vHome()}else switch(st.id){
+  case 'opening':h=vOpening();break;
+  case 'quizBrief':case 'takeBrief':case 'ffBrief':case 'mapBrief':case 'vcBrief':case 'finBrief':case 'swotBrief':case 'afterBrief':h=brief(st.id);break;
+  case 'quiz':h=vQuiz();break;
+  case 'takeTimer':h=vPaper('First take','Worksheet · in groups',4,'take',['Fill in the “First take” column','Pick the plan you’d back now','When time’s up, call out your pick'],'Next: First picks');break;
+  case 'firstPicks':h=vFirstPicks();break;
+  case 'ffGame':h=vFF();break;
+  case 'ffDebrief':h=vFFDebrief();break;
+  case 'mapGame':h=vMapGame();break;
+  case 'mapDebrief':h=vMapDebrief();break;
+  case 'break':h=vBreak();break;
+  case 'vcTimer':h=vPaper('Value chain','Poster · in groups',7,'vc',['Work through your 3 activities','One weakness each, with its case fact','Circle the most serious one'],'Show the answer key');break;
+  case 'vcReveal':h=vVCReveal();break;
+  case 'finTimer':h=vPaper('Financial indicators','Worksheet · in groups',7,'fin',['Use Exhibit 1 and the formulas','Work out each indicator for both years','Raise your hand when you have one'],'Show the answers');break;
+  case 'finReveal':h=vFinReveal();break;
+  case 'swotGame':h=vSwot();break;
+  case 'mapAlt':h=vMapAlt();break;
+  case 'afterTimer':h=vPaper('Final take','Worksheet · in groups',6,'after',['Fill in the “After analysis” column','Use the SWOT and numbers on the right as evidence','Fill in “What changed our minds?”'],'Final picks',true);break;
+  case 'finalPicks':h=vFinalPicks();break;
+  case 'share':h=vShare();break;
+  case 'podium':h=vPodium();break;
+ }
+ $('#stage').innerHTML=h;
+ if(S.home)S.lastTrays=S.scores.map(s=>Math.floor(s/50));
+ $('#jump').value=String(S.step);$('#homebtn').classList.toggle('on',S.home);
+ updateTimerUI();
+ if(!S.home&&st.id==='mapAlt')requestAnimationFrame(drawAltArrows);
+ duck();save();
+}
+
+function drawAltArrows(){const svg=document.getElementById('arrows'),grid=document.getElementById('grid9'),al=document.getElementById('alderChip');if(!svg||!grid||!al)return;
+ const sc=scale||1,gr=grid.getBoundingClientRect(),c=e=>{const r=e.getBoundingClientRect();return{x:(r.left+r.width/2-gr.left)/sc,y:(r.top+r.height/2-gr.top)/sc,w:r.width/sc,h:r.height/sc}};
+ const A=c(al);let out='<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#C9580A"/></marker></defs>';
+ ['altA','altB'].forEach(id=>{const e=document.getElementById(id);if(!e)return;const T=c(e),dx=T.x-A.x,dy=T.y-A.y,horiz=Math.abs(dx)>Math.abs(dy),len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
+  const so=horiz?A.w/2+6:A.h/2+6,eo=horiz?T.w/2+8:T.h/2+8;
+  out+=`<line x1="${A.x+ux*so}" y1="${A.y+uy*so}" x2="${T.x-ux*eo}" y2="${T.y-uy*eo}" stroke="#C9580A" stroke-width="3" marker-end="url(#ah)"/>`});
+ svg.setAttribute('width',gr.width/sc);svg.setAttribute('height',gr.height/sc);svg.innerHTML=out}
+
+/* ======================= timer ======================= */
+function startTimer(sec,owner){S.timer={total:sec,left:sec,run:true,end:Date.now()+sec*1000,owner:owner};$('#stage').classList.remove('flash');updateTimerUI();save()}
+function updateTimerUI(){const t=S.timer;document.querySelectorAll('.tleft').forEach(el=>{el.textContent=fmt(t.left);el.classList.toggle('done',t.total>0&&t.left<=0&&el.classList.contains('tm'));el.classList.toggle('low',t.left>0&&t.left<=30)});
+ document.querySelectorAll('.trays').forEach(tr=>{const n=+tr.dataset.n,f=Math.ceil(t.left/60);[...tr.children].forEach((c,i)=>c.classList.toggle('f',i<Math.min(n,f)))});
+ $('#tplay').textContent=t.run?'Pause':'Resume'}
+function enterStep(){const st=stepObj();
+ if(st.id==='quiz'){if(!S.quiz.debrief&&!S.quiz.rev&&S.timer.owner!=='quiz-'+S.quiz.i)startTimer(15,'quiz-'+S.quiz.i);return}
+ if(st.id==='share'){const o='share-'+S.share.g+'-'+S.share.phase;if(S.timer.owner!==o)startTimer(S.share.phase==='share'?60:40,o);return}
+ if(st.sec&&S.timer.owner!==st.id)startTimer(st.sec,st.id)}
+setInterval(()=>{const t=S.timer;if(!t.run)return;t.left=Math.max(0,(t.end-Date.now())/1000);if(t.left<=0){t.run=false;bell();$('#stage').classList.add('flash');setTimeout(()=>$('#stage').classList.remove('flash'),3200);if(stepObj().id==='quiz'&&!S.quiz.rev&&!S.quiz.debrief&&!S.home){S.quiz.rev=true;render()}save()}updateTimerUI()},250);
+
+/* ======================= audio ======================= */
+let ac=null,master,beatGain,noiseBuf,beatTimer=null,nextT=0,stepN=0;
+function ensureAC(){try{if(!ac){const A=window.AudioContext||window.webkitAudioContext;if(!A)return false;ac=new A();master=ac.createGain();master.gain.value=S.vol;master.connect(ac.destination);beatGain=ac.createGain();beatGain.gain.value=0;beatGain.connect(master);const len=ac.sampleRate;noiseBuf=ac.createBuffer(1,len,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1}if(ac.state==='suspended')ac.resume();return true}catch(e){return false}}
+function tone(freq,t,dur,vol,type,dest){const o=ac.createOscillator(),g=ac.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(dest||master);o.start(t);o.stop(t+dur+0.05)}
+function noise(t,dur,vol,filt,freq,dest){const s=ac.createBufferSource();s.buffer=noiseBuf;const f=ac.createBiquadFilter();f.type=filt;f.frequency.value=freq;const g=ac.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest||master);s.start(t);s.stop(t+dur+0.05)}
+function bell(){if(!ensureAC())return;const t=ac.currentTime+0.02;[0,0.38,0.76].forEach(d=>{tone(1046,t+d,1.2,0.35);tone(1568,t+d,0.9,0.18);tone(2093,t+d,0.5,0.08)})}
+function drumroll(done){if(!ensureAC()){done&&done();return}const t0=ac.currentTime+0.05;let t=t0,gap=0.07,v=0.15;while(t<t0+2.4){noise(t,0.05,v,'bandpass',1800);t+=gap;gap=Math.max(0.028,gap*0.97);v=Math.min(0.5,v*1.02)}
+ const end=t0+2.45;tone(70,end,0.6,0.7,'sine');noise(end,1.6,0.5,'highpass',5000);noise(end,0.4,0.4,'bandpass',1500);setTimeout(()=>done&&done(),2500)}
+const CHORDS=[[220,261.6,329.6,392],[174.6,220,261.6,329.6],[261.6,329.6,392,493.9],[196,246.9,293.7,392]];
+function scheduleBeat(){const spb=60/84/4;while(nextT<ac.currentTime+0.15){const s=stepN%16,bar=Math.floor(stepN/16)%4,t=nextT;
+  if(s===0||s===10){tone(110,t,0.28,0.55,'sine',beatGain);tone(55,t,0.3,0.4,'sine',beatGain)}
+  if(s===4||s===12)noise(t,0.18,0.22,'bandpass',1400,beatGain);
+  if(s%2===0)noise(t,0.04,s%4===2?0.09:0.05,'highpass',7000,beatGain);
+  if(s===0)CHORDS[bar].forEach(f=>tone(f,t,spb*15,0.045,'triangle',beatGain));
+  if(s===8)tone(CHORDS[bar][3]*2,t,0.4,0.03,'sine',beatGain);
+  nextT+=spb;stepN++}}
+function setBeat(on){if(on&&!ensureAC()){toast('Sound isn’t available in this browser',true);return}S.beat=on;
+ if(on){nextT=ac.currentTime+0.05;stepN=0;clearInterval(beatTimer);beatTimer=setInterval(scheduleBeat,50);duck()}else{clearInterval(beatTimer);beatTimer=null;if(beatGain)beatGain.gain.setTargetAtTime(0,ac.currentTime,0.1)}
+ $('#beatbtn').textContent=on?'Beat: on':'Beat: off';$('#beatbtn').classList.toggle('on',on);if(stepObj().id==='break'&&!S.home)render()}
+function duck(){if(!ac||!S.beat)return;const talk=!S.home&&stepObj().talk;beatGain.gain.setTargetAtTime(talk?0.35:1,ac.currentTime,0.4)}
+
+function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const cv=$('#confetti'),cx=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;const cols=['#1E5FA3','#C9580A','#93306A','#FFD43B','#1F5A43'];
+ const P=Array.from({length:170},()=>({x:innerWidth/2+(Math.random()-.5)*240,y:innerHeight*.35,vx:(Math.random()-.5)*15,vy:-Math.random()*15-4,s:6+Math.random()*7,c:cols[Math.floor(Math.random()*5)],r:Math.random()*6}));let f=0;
+ (function tick(){cx.clearRect(0,0,cv.width,cv.height);P.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.r+=.1;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cx.restore()});if(++f<160)requestAnimationFrame(tick);else cx.clearRect(0,0,cv.width,cv.height)})()}
+
+function placeCard(key,id,zone){const st=S[key],cards=key==='ff'?FF:SW,c=cards.find(x=>x.id===id);if(!c)return;const t=st.turn;st.sel=null;
+ const ok=c.z===zone;if(ok){st.placed[id]=zone;S.scores[t]+=50}st.turn=(t+1)%3;render();
+ toast(ok?`Correct! ${G[t].name} stocks a meal · +50`:`Not quite. ${G[t].name}’s turn passes.`,!ok)}
+function go(i){i=Math.max(0,Math.min(STEPS.length-1,i));S.home=false;S.step=i;enterStep();render()}
+
+/* ======================= events ======================= */
+document.addEventListener('click',e=>{
+ const zone=e.target.closest('[data-drop]');
+ if(zone&&!e.target.closest('button')){const k=zone.dataset.k;if(S[k]&&S[k].sel){placeCard(k,S[k].sel,zone.dataset.drop);return}}
+ const cell=e.target.closest('.cell[data-cell]');
+ if(cell&&S.map.sel&&!S.home&&stepObj().id==='mapGame'&&!e.target.closest('[data-act="msel"]')){S.map.cells[S.map.sel]=+cell.dataset.cell;S.map.sel=null;S.map.turn=(S.map.turn+1)%3;render();return}
+ const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,g=+b.dataset.g;
+ if(a!=='beat')ensureAC();
+ switch(a){
+  case 'next':go(S.step+1);break;
+  case 'prev':if(S.home){S.home=false;render()}else go(S.step-1);break;
+  case 'home':S.home=!S.home;render();break;
+  case 'pts':S.scores[g]=Math.max(0,S.scores[g]+(+b.dataset.p));render();toast(((+b.dataset.p)>0?'+':'')+b.dataset.p+' '+G[g].name,(+b.dataset.p)<0);break;
+  case 'ontime':{const arr=S.awards[b.dataset.id]||(S.awards[b.dataset.id]=[false,false,false]);arr[g]=!arr[g];S.scores[g]=Math.max(0,S.scores[g]+(arr[g]?50:-50));render();if(arr[g])toast(`On time · +50 ${G[g].name}`);break}
+  case 'tplay':{const t=S.timer;if(t.run){t.run=false;t.left=Math.max(0,(t.end-Date.now())/1000)}else{if(t.left<=0)t.left=t.total||60;t.run=true;t.end=Date.now()+t.left*1000}updateTimerUI();save();break}
+  case 'tadd':{const t=S.timer;t.left+=60;t.total=Math.max(t.total,t.left);if(t.run)t.end+=60000;updateTimerUI();save();break}
+  case 'treset':{const t=S.timer;startTimer(t.total||60,t.owner);break}
+  case 'beat':ensureAC();setBeat(!S.beat);break;
+  case 'testbell':bell();break;
+  case 'resetask':$('#confirmslot').innerHTML=`<div id="confirm">Start a new game? This clears every score, pick and answer on this laptop.<button class="btn solid" data-act="resetyes">Clear and start over</button><button class="btn" data-act="resetno">Keep playing</button></div>`;break;
+  case 'resetyes':{const vol=S.vol;setBeat(false);S=fresh();S.vol=vol;$('#confirmslot').innerHTML='';go(0);break}
+  case 'resetno':$('#confirmslot').innerHTML='';break;
+  case 'qok':{const Q=S.quiz;if(Q.rev)break;Q.win[Q.i]=g;Q.rev=true;S.timer.run=false;S.scores[g]+=50;render();toast(`${G[g].name} called it · +50`);break}
+  case 'qno':{const Q=S.quiz,l=Q.lock[Q.i]||(Q.lock[Q.i]=[false,false,false]);l[g]=true;if(l.every(Boolean)){Q.rev=true;S.timer.run=false}render();toast(`${G[g].name}: wrong · locked out`,true);break}
+  case 'qrev':S.quiz.rev=true;S.timer.run=false;render();break;
+  case 'qnext':{S.quiz.i++;const l=S.quiz.lock[S.quiz.i];S.quiz.rev=S.quiz.win[S.quiz.i]!=null||(!!l&&l.every(Boolean));enterStep();render();break}
+  case 'qprev':S.quiz.i--;S.quiz.rev=true;render();break;
+  case 'qdebrief':S.quiz.debrief=true;startTimer(60,'quizdebrief');render();break;
+  case 'qback':S.quiz.debrief=false;S.quiz.rev=true;render();break;
+  case 'pick':S.picks[b.dataset.w][g]=b.dataset.k;render();break;
+  case 'sel':{const k=b.dataset.k;S[k].sel=S[k].sel===b.dataset.id?null:b.dataset.id;render();break}
+  case 'turn':S[b.dataset.k].turn=g;render();break;
+  case 'rate':S.ff.rate[b.dataset.f]=S.ff.rate[b.dataset.f]===b.dataset.r?null:b.dataset.r;render();break;
+  case 'msel':S.map.sel=S.map.sel===b.dataset.id?null:b.dataset.id;render();break;
+  case 'mkey':S.map.key=!S.map.key;render();break;
+  case 'alt':{const i=+b.dataset.i;S.alt[i]=!S.alt[i];render();break}
+  case 'leak':S.vc.leak=S.vc.leak===b.dataset.id?null:b.dataset.id;render();break;
+  case 'finrev':S.fin.rev[b.dataset.m]=!S.fin.rev[b.dataset.m];render();break;
+  case 'finwin':S.fin.win[b.dataset.m]=g;S.fin.rev[b.dataset.m]=true;S.scores[g]+=100;render();toast(`First correct · +100 ${G[g].name}`);break;
+  case 'finundo':{const w=S.fin.win[b.dataset.m];if(w!=null)S.scores[w]=Math.max(0,S.scores[w]-100);delete S.fin.win[b.dataset.m];render();break}
+  case 'shareq':S.share.phase='q';enterStep();render();break;
+  case 'sharenext':S.share.done[S.share.g]=true;S.share.g=Math.min(2,S.share.g+1);S.share.phase='share';enterStep();render();break;
+  case 'shareg':S.share.g=g;S.share.phase='share';enterStep();render();break;
+  case 'drumroll':b.disabled=true;drumroll(()=>{S.podium.rev=true;render();confetti()});break;
+  case 'confetti':confetti();break;
+ }
+});
+document.addEventListener('dragstart',e=>{const c=e.target.closest&&e.target.closest('[data-act="sel"]');if(c){e.dataTransfer.setData('text/plain',c.dataset.k+'|'+c.dataset.id);e.dataTransfer.effectAllowed='move'}});
+document.addEventListener('dragover',e=>{if(e.target.closest&&e.target.closest('[data-drop]'))e.preventDefault()});
+document.addEventListener('drop',e=>{const z=e.target.closest&&e.target.closest('[data-drop]');if(!z)return;e.preventDefault();const parts=(e.dataTransfer.getData('text/plain')||'').split('|');if(parts[0]&&parts[1]&&S[parts[0]])placeCard(parts[0],parts[1],z.dataset.drop)});
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='vol'){S.vol=+t.value;if(master)master.gain.setTargetAtTime(S.vol,ac.currentTime,0.05);save();return}const f=t.dataset&&t.dataset.field;if(f){S.rec[f]=t.value;save()}});
+document.addEventListener('change',e=>{if(e.target.id==='jump')go(+e.target.value)});
+document.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;if(e.key==='ArrowRight'){e.preventDefault();go(S.step+1)}else if(e.key==='ArrowLeft'){e.preventDefault();go(S.step-1)}});
+
+let scale=1;
+function fit(){const vw=innerWidth,vh=innerHeight-54;scale=Math.min(vw/1280,vh/720);const st=$('#stage');st.style.transform=`scale(${scale})`;st.style.margin=`${(720*scale-720)/2}px ${(1280*scale-1280)/2}px`;if(!S.home&&stepObj().id==='mapAlt')requestAnimationFrame(drawAltArrows)}
+addEventListener('resize',fit);
+
+$('#jump').innerHTML=STEPS.map((s,i)=>`<option value="${i}">${i+1}. ${s.label}</option>`).join('');
+$('#vol').value=S.vol;
+fit();enterStep();render();
+})();
+</script>
+
+</body></html>
